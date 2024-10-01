@@ -30,7 +30,7 @@ let startButton;
 
 // Title and Subtitle
 let title = "Math Snake by M. Lodhia";
-let subtitle = "Use arrow keys to play and press Esc to pause";
+let subtitle = "Use arrow keys or WASD to play and press Esc to pause";
 
 // Game Speed Label
 let speedLabel = "Game Speed";
@@ -86,13 +86,13 @@ function draw() {
 
 function keyPressed() {
     if (game_state === 'RUNNING') {
-        if (keyCode === UP_ARROW && direction !== 'DOWN') {
+        if ((keyCode === UP_ARROW || key === 'W' || key === 'w') && direction !== 'DOWN') {
             direction = 'UP';
-        } else if (keyCode === DOWN_ARROW && direction !== 'UP') {
+        } else if ((keyCode === DOWN_ARROW || key === 'S' || key === 's') && direction !== 'UP') {
             direction = 'DOWN';
-        } else if (keyCode === LEFT_ARROW && direction !== 'RIGHT') {
+        } else if ((keyCode === LEFT_ARROW || key === 'A' || key === 'a') && direction !== 'RIGHT') {
             direction = 'LEFT';
-        } else if (keyCode === RIGHT_ARROW && direction !== 'LEFT') {
+        } else if ((keyCode === RIGHT_ARROW || key === 'D' || key === 'd') && direction !== 'LEFT') {
             direction = 'RIGHT';
         } else if (key === 'Escape') {
             game_state = 'PAUSED';
@@ -369,7 +369,7 @@ function drawFoodItems() {
         rect(item.x * CELL_SIZE, item.y * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE);
         fill(TEXT_COLOR);
         noStroke();
-        textSize(24);
+        textSize(CELL_SIZE * 0.6); // Adjusted text size to fit within the box
         textAlign(CENTER, CENTER);
         text(item.value, (item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
     }
