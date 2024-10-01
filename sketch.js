@@ -13,8 +13,6 @@ const CHECK_COLOR = '#00FF00';
 const FPS_VALUES = {1:5, 2:6, 3:7, 4:8, 5:9}; // Speed selection mapping
 const MAX_SNAKE_LENGTH = 24; // Maximum snake length
 const INITIAL_LIVES = 10; // Starting lives and snake length
-const CORRECT_ANSWERS_TO_LEVEL_UP = 15; // Correct answers needed to level up
-const MAX_LEVEL = 5; // Maximum level
 
 let snake = [];
 let direction = 'RIGHT';
@@ -26,10 +24,8 @@ let food = [];
 let x_marks = [];
 let check_marks = [];
 let confetti_particles = [];
-let game_state = 'WELCOME'; // WELCOME, RUNNING, PAUSED, GAME_OVER, LEVEL_UP
+let game_state = 'WELCOME'; // WELCOME, RUNNING, PAUSED, GAME_OVER
 let selected_speed = 3; // Default speed
-let level = 1; // Starting level
-let correct_answers_in_level = 0; // Correct answers in the current level
 
 // Buttons
 let speedButtons = [];
@@ -66,11 +62,6 @@ function draw() {
 
     if (game_state === 'WELCOME') {
         drawWelcomeScreen();
-        return; // Skip other drawing
-    }
-
-    if (game_state === 'LEVEL_UP') {
-        drawLevelUpScreen();
         return; // Skip other drawing
     }
 
@@ -127,19 +118,10 @@ function keyPressed() {
             lives = INITIAL_LIVES;
             score_correct = 0;
             score_total = 0;
-            level = 1;
-            correct_answers_in_level = 0;
             game_state = 'WELCOME';
             initSnake();
             initFood();
             createWelcomeScreen();
-        }
-    }
-
-    if (game_state === 'LEVEL_UP') {
-        if (key === 'C' || key === 'c') {
-            game_state = 'RUNNING';
-            generateFood(); // Generate new food for the next level
         }
     }
 }
@@ -205,57 +187,28 @@ function generateMathProblem() {
     let operation = random(operations);
     let a, b, question, answer;
 
-    // Define max number based on level
-    let max_number = 0;
-    let max_result = 0;
-    switch (level) {
-        case 1:
-            max_number = 4;
-            max_result = 16; // 4 * 4
-            break;
-        case 2:
-            max_number = 6;
-            max_result = 36; // 6 * 6
-            break;
-        case 3:
-            max_number = 8;
-            max_result = 64; // 8 * 8
-            break;
-        case 4:
-            max_number = 10;
-            max_result = 100; // 10 * 10
-            break;
-        case 5:
-            max_number = 12;
-            max_result = 144; // 12 * 12
-            break;
-        default:
-            max_number = 12;
-            max_result = 144;
-    }
-
     switch (operation) {
         case '+':
-            a = floor(random(0, max_result + 1));
-            b = floor(random(0, max_result + 1 - a));
+            a = floor(random(0, 51));
+            b = floor(random(0, 51 - a));
             question = `${a} + ${b}`;
             answer = a + b;
             break;
         case '-':
-            a = floor(random(0, max_result + 1));
+            a = floor(random(0, 51));
             b = floor(random(0, a + 1));
             question = `${a} - ${b}`;
             answer = a - b;
             break;
         case '*':
-            a = floor(random(1, max_number + 1));
-            b = floor(random(1, max_number + 1));
+            a = floor(random(1, 13));
+            b = floor(random(1, 13));
             question = `${a} × ${b}`;
             answer = a * b;
             break;
         case '/':
-            b = floor(random(1, max_number + 1));
-            answer = floor(random(1, max_number + 1));
+            b = floor(random(1, 13));
+            answer = floor(random(1, 13));
             a = b * answer;
             question = `${a} ÷ ${b}`;
             break;
@@ -290,11 +243,8 @@ function generateFood() {
 
     all_answers.forEach(value => {
         let pos;
-        let attempts = 0;
         do {
             pos = { x: floor(random(0, GRID_WIDTH)), y: floor(random(0, GRID_HEIGHT)) };
-            attempts++;
-            if (attempts > 1000) break; // Avoid infinite loop
         } while (food_positions.has(`${pos.x},${pos.y}`));
         food_positions.add(`${pos.x},${pos.y}`);
         food.push({
@@ -330,16 +280,6 @@ function moveSnake() {
     // Wrap around the grid
     head.x = (head.x + GRID_WIDTH) % GRID_WIDTH;
     head.y = (head.y + GRID_HEIGHT) % GRID_HEIGHT;
-
-    // Check for self-collision
-    for (let i = 0; i < snake.length; i++) {
-        if (head.x === snake[i].x && head.y === snake[i].y) {
-            lives = 0;
-            game_state = 'GAME_OVER';
-            return;
-        }
-    }
-
     snake.unshift(head);
     snake.pop();
 }
@@ -353,15 +293,6 @@ function handleCollisions() {
                 // Correct Answer
                 score_correct += 1;
                 score_total += 1;
-                correct_answers_in_level += 1;
-
-                // Check for level up
-                if (correct_answers_in_level >= CORRECT_ANSWERS_TO_LEVEL_UP && level < MAX_LEVEL) {
-                    level += 1;
-                    correct_answers_in_level = 0;
-                    game_state = 'LEVEL_UP';
-                    return; // Skip further processing
-                }
 
                 // Increase lives and grow snake every 5 correct answers
                 if (score_correct % 5 === 0) {
@@ -400,13 +331,8 @@ function drawTopPanel() {
     noStroke();
     rect(0, 0, width, 100);
 
-    // Draw Level
-    fill(TEXT_COLOR);
-    textSize(32);
-    textAlign(LEFT, CENTER);
-    text(`Level ${level}`, 20, 60);
-
     // Draw Math Problem
+    fill(TEXT_COLOR);
     textSize(24);
     textAlign(CENTER, CENTER);
     text(`Solve: ${current_problem.question}`, width / 2, 60);
@@ -557,20 +483,6 @@ function drawWelcomeScreen() {
     // Buttons are already created and positioned
 }
 
-function drawLevelUpScreen() {
-    fill('rgba(0,0,0,0.7)');
-    noStroke();
-    rect(0, 0, width, height);
-
-    fill(TEXT_COLOR);
-    textSize(40);
-    textAlign(CENTER, CENTER);
-    text("Level Up!", width / 2, height / 2 - 50);
-    textSize(24);
-    text(`Welcome to Level ${level}!`, width / 2, height / 2);
-    text("Press 'C' to Continue.", width / 2, height / 2 + 50);
-}
-
 function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
     noStroke();
@@ -605,8 +517,6 @@ function resetGame() {
     lives = INITIAL_LIVES; // Reset lives to initial value
     score_correct = 0;
     score_total = 0;
-    level = 1;
-    correct_answers_in_level = 0;
     game_state = 'RUNNING';
     x_marks = [];
     check_marks = [];
