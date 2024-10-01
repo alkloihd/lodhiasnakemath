@@ -207,35 +207,42 @@ function generateMathProblem() {
 
     // Define max number based on level
     let max_number = 0;
+    let max_result = 0;
     switch (level) {
         case 1:
             max_number = 4;
+            max_result = 16; // 4 * 4
             break;
         case 2:
             max_number = 6;
+            max_result = 36; // 6 * 6
             break;
         case 3:
             max_number = 8;
+            max_result = 64; // 8 * 8
             break;
         case 4:
             max_number = 10;
+            max_result = 100; // 10 * 10
             break;
         case 5:
             max_number = 12;
+            max_result = 144; // 12 * 12
             break;
         default:
             max_number = 12;
+            max_result = 144;
     }
 
     switch (operation) {
         case '+':
-            a = floor(random(0, max_number + 1));
-            b = floor(random(0, max_number + 1 - a));
+            a = floor(random(0, max_result + 1));
+            b = floor(random(0, max_result + 1 - a));
             question = `${a} + ${b}`;
             answer = a + b;
             break;
         case '-':
-            a = floor(random(0, max_number + 1));
+            a = floor(random(0, max_result + 1));
             b = floor(random(0, a + 1));
             question = `${a} - ${b}`;
             answer = a - b;
